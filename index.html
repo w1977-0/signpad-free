@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>手写签名板 / Signature Pad / 手書きサイン — signpad-free: 免费在线签名,导出透明PNG,无上传</title>
+<meta name="description" content="免费手写签名板:鼠标/手指/触控笔书写,自动笔锋(快写细慢写粗),导出透明底PNG,适合合同/快递/报名表。照片不上传,浏览器本地处理。Free online signature pad: real pen feel, export transparent PNG, no upload, no watermark. 手書きサイン:ペン先の太さを再現,透過PNGで保存,アップロード不要・無料。">
+<meta name="keywords" content="手写签名,在线签名,签名板,签名生成器,透明背景签名,合同签名,电子签名,qianming,signature pad,signature maker,electronic signature,sign online,transparent png,手書きサイン,サイン作成,電子署名,サインジェネレーター">
+<meta name="author" content="w1977-0">
+<link rel="canonical" href="https://w1977-0.github.io/signpad-free/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://w1977-0.github.io/signpad-free/">
+<meta property="og:title" content="signpad-free — 手写签名板 / Signature Pad / 手書きサイン">
+<meta property="og:description" content="免费·隐私:真实笔锋,导出透明PNG,全程浏览器本地,无上传无水印。Free & private, real pen feel, transparent PNG.">
+<meta property="og:site_name" content="signpad-free">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "signpad-free",
+  "url": "https://w1977-0.github.io/signpad-free/",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any (browser)",
+  "description": [
+    {"@language": "zh", "value": "免费手写签名板:真实笔锋,导出透明底PNG,照片不上传。"},
+    {"@language": "en", "value": "Free signature pad: real pen feel, export a transparent PNG — private, in-browser, no upload."},
+    {"@language": "ja", "value": "無料の手書きサイン:ペン先を再現,透過PNGで保存,アップロード不要。"}
+  ],
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "featureList": "pen-feel stroke · transparent PNG export · undo/redo · touch & stylus · no upload · open source",
+  "isAccessibleForFree": true
+}
+</script>
+<style>
+  :root {
+    color-scheme: light dark;
+    --ink: #141311; --paper: #fdfcf8; --fg: #141311; --bg: #f4f2ec;
+    --faint: rgba(20,19,17,.55); --hair: rgba(20,19,17,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #f2efe8; --paper: #1b1b1f; --fg: #ece9e2; --bg: #101010; --faint: rgba(242,239,232,.55); --hair: rgba(242,239,232,.16); }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font: 16px/1.5 ui-sans-serif, system-ui, "Helvetica Neue", "PingFang SC", sans-serif;
+    background: var(--bg); color: var(--fg);
+    min-height: 100dvh; display: grid; place-items: center;
+    padding: clamp(1rem, 4vh, 3rem) 1.25rem;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { width: min(46rem, 94vw); }
+  .masthead { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 1.2rem; }
+  .brand { font-weight: 700; letter-spacing: .28em; text-transform: uppercase; font-size: .95rem; }
+  .mast-note { font-size: .78rem; color: var(--faint); text-align: right; }
+  .pad {
+    position: relative; background: var(--paper);
+    border: 2px solid var(--fg); height: clamp(13rem, 32vh, 19rem);
+    touch-action: none; cursor: crosshair; display: block; width: 100%;
+  }
+  .pad.hint::after {
+    content: "在此签名 · Sign here · ここにサイン";
+    position: absolute; inset: 0; display: grid; place-items: center;
+    font-size: .95rem; color: var(--hair); letter-spacing: .1em; pointer-events: none;
+  }
+  .tools { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-top: .8rem; }
+  .tools .sp { flex: 1; }
+  button, select {
+    font: 650 .86rem/1 inherit; color: var(--fg); background: var(--paper);
+    border: 1.5px solid var(--fg); padding: .5rem .95rem; cursor: pointer;
+    border-radius: 0; letter-spacing: .04em;
+  }
+  button.solid { background: var(--fg); color: var(--bg); }
+  button:disabled { opacity: .3; cursor: not-allowed; }
+  .ink-color { display: flex; align-items: center; gap: .4rem; font-size: .78rem; color: var(--faint); }
+  .ink-color input { accent-color: var(--fg); width: 1.8rem; height: 1.8rem; padding: 0; border: 1.5px solid var(--fg); background: none; cursor: pointer; }
+  .out { margin-top: 1.4rem; }
+  .out .row { display: flex; gap: 1.4rem; align-items: start; flex-wrap: wrap; }
+  .out canvas { border: 1.5px solid var(--hair); max-width: 100%; background-image: none; }
+  .out .facts { font-size: .84rem; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .out .facts b { color: var(--fg); font-weight: 600; }
+  .checker { background-image: repeating-conic-gradient(var(--hair) 0 25%, transparent 0 50%); background-size: 12px 12px; }
+  footer { margin-top: 2rem; font-size: .72rem; color: var(--faint); display: flex; gap: 1.4rem; flex-wrap: wrap; }
+  footer a { color: inherit; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="masthead">
+    <span class="brand">signpad-free</span>
+    <span class="mast-note">签名不出浏览器 · 无上传 · 无水印 — signature pad, in your browser · ブラウザだけで完結</span>
+  </div>
+
+  <canvas class="pad hint" id="pad"></canvas>
+
+  <div class="tools">
+    <button id="undo" disabled>↩ 撤销 Undo</button>
+    <button id="redo" disabled>↪ 重做 Redo</button>
+    <button id="clear">✕ 清空 Clear</button>
+    <span class="sp"></span>
+    <label class="ink-color">墨色
+      <input type="color" id="color" value="#141311">
+    </label>
+    <select id="thick" title="笔触大小">
+      <option value="1.5">细笔 Fine</option>
+      <option value="2.5" selected>中笔 Medium</option>
+      <option value="4">粗笔 Bold</option>
+    </select>
+    <button class="solid" id="save" disabled>↓ 下载签名 PNG</button>
+  </div>
+
+  <div class="out" id="out" hidden>
+    <div class="row">
+      <div><canvas id="preview" class="checker"></canvas></div>
+      <div class="facts">
+        <p>导出为 <b>透明底 PNG</b>(棋盘格=透明)</p>
+        <p>尺寸 <b id="f-size">—</b></p>
+        <p style="margin-top:.6rem"><button id="white">改导出白底 JPEG</button></p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>笔锋:快写变细·慢写变粗·自动平滑</span>
+    <a href="https://github.com/w1977-0/signpad-free" rel="noopener">signpad-free</a>
+    <a href="https://github.com/w1977-0/signpad-free#how-it-works" rel="noopener">how it works</a>
+  </footer>
+</main>
+<script>
+// signmath.js — signpad-free core stroke math. Zero dependencies, browser + Node.
+//
+// The feel of a real pen comes from three things, all pure math:
+//   1. smoothing — pointer input is jittery; a first-order low-pass filter and
+//      midpoint quadratic Béziers turn it into a flowing line
+//   2. velocity-aware width — fast strokes run thin, slow strokes run fat,
+//      exactly like ink flow (the classic Square signature-pad recipe:
+//      width interpolates between minWidth and maxWidth as velocity rises)
+//   3. continuous strips — variable-width segments render as filled
+//      quadrilateral strips with round caps, never dotted circles
+
+(function (root, factory) {
+  if (typeof module === "object" && module.exports) module.exports = factory();
+  else root.signmath = factory();
+})(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+
+  // ---- points ----------------------------------------------------------
+  function makePoint(x, y, pressure, time) {
+    return {
+      x: x,
+      y: y,
+      pressure: pressure || 0,
+      time: time === undefined ? Date.now() : time
+    };
+  }
+
+  function dist(a, b) {
+    return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+  }
+
+  function velocityFrom(prev, cur) {
+    return cur.time !== prev.time ? dist(prev, cur) / (cur.time - prev.time) : 0;
+  }
+
+  // ---- smoothing -------------------------------------------------------
+  // First-order low-pass: each new point is pulled partway toward the last
+  // smoothed one. k=0 → no smoothing, k→1 → heavy lag. 0.55 is the sweet
+  // spot for handwriting: kills jitter, keeps flick response.
+  function smoothPoint(prevSmoothed, raw, k) {
+    k = k === undefined ? 0.55 : k;
+    return {
+      x: raw.x + (prevSmoothed.x - raw.x) * k,
+      y: raw.y + (prevSmoothed.y - raw.y) * k,
+      pressure: raw.pressure,
+      time: raw.time
+    };
+  }
+
+  // ---- velocity-aware width -------------------------------------------
+  // width = maxWidth when stopped, minWidth when fast.
+  // velocity 0..∞ is mapped through an exponential decay (fast rises clamp
+  // quickly), weighted 70% velocity / 30% pressure when pressure is available.
+  function strokeWidth(prev, cur, opts) {
+    opts = opts || {};
+    var minW = opts.minWidth !== undefined ? opts.minWidth : 0.5;
+    var maxW = opts.maxWidth !== undefined ? opts.maxWidth : 2.5;
+    var vWeight = opts.velocityFilterWeight !== undefined ? opts.velocityFilterWeight : 0.7;
+    var scale = opts.scale || 1; // device-pixel factor: css px → device px
+
+    var v = velocityFrom(prev, cur);
+    // normalized speed: 1.5 px/ms is already "fast" handwriting
+    var vNorm = Math.min(1, v / 1.5);
+    var tWidth = maxW - vNorm * (maxW - minW); // velocity term: fast → thin
+
+    // pressure term: only meaningful when the device reports real pressure
+    // (Apple Pencil etc.); a mouse reports 0.5 constant — treated as absent.
+    var p = cur.pressure > 0 && cur.pressure < 1 ? cur.pressure : null;
+    var width = p === null
+      ? tWidth
+      : (1 - vWeight) * (minW + p * (maxW - minW)) + vWeight * tWidth;
+
+    return Math.max(minW, Math.min(maxW, width)) * scale;
+  }
+
+  // ---- stroke rendering geometry (pure data, canvas-free) --------------
+  // Returns the strip for one segment: a quad from (prev at w1/2 either
+  // side of the normal) to (cur at w2/2). The renderer fills it.
+  function segmentStrip(prev, cur, wPrev, wCur) {
+    var dx = cur.x - prev.x, dy = cur.y - prev.y;
+    var len = Math.sqrt(dx * dx + dy * dy) || 1;
+    var nx = -dy / len, ny = dx / len; // unit normal
+    var h1 = wPrev / 2, h2 = wCur / 2;
+    return {
+      // quad corners, in order: prev-left, prev-right, cur-right, cur-left
+      quad: [
+        { x: prev.x + nx * h1, y: prev.y + ny * h1 },
+        { x: prev.x - nx * h1, y: prev.y - ny * h1 },
+        { x: cur.x - nx * h2,  y: cur.y - ny * h2 },
+        { x: cur.x + nx * h2,  y: cur.y + ny * h2 }
+      ],
+      // round caps to seal joints between segments
+      capFrom: { x: prev.x, y: prev.y, r: h1 },
+      capTo: { x: cur.x, y: cur.y, r: h2 }
+    };
+  }
+
+  // ---- whole-stroke pipeline -------------------------------------------
+  // rawPoints: [{x,y,pressure,time}] in css px (already low-pass filtered or
+  // not — this applies the filter itself when k > 0).
+  // Returns strips[] for the renderer.
+  function buildStroke(rawPoints, opts) {
+    opts = opts || {};
+    if (!rawPoints || rawPoints.length === 0) return [];
+    var k = opts.smoothing === undefined ? 0.55 : opts.smoothing;
+
+    // low-pass filter the raw series
+    var pts = [rawPoints[0]];
+    for (var i = 1; i < rawPoints.length; i++) {
+      pts.push(smoothPoint(pts[i - 1], rawPoints[i], k));
+    }
+
+    // width per point (strokeWidth needs a previous point: first uses itself)
+    var widths = pts.map(function (p, j) {
+      return j === 0
+        ? strokeWidth(pts[0], pts[Math.min(1, pts.length - 1)] || pts[0], opts)
+        : strokeWidth(pts[j - 1], p, opts);
+    });
+
+    // strips between consecutive points
+    var strips = [];
+    for (var s = 0; s < pts.length - 1; s++) {
+      strips.push(segmentStrip(pts[s], pts[s + 1], widths[s], widths[s + 1]));
+    }
+    // a single tap = a dot
+    if (pts.length === 1) {
+      strips.push({
+        quad: null,
+        capFrom: { x: pts[0].x, y: pts[0].y, r: widths[0] / 2 },
+        capTo: null
+      });
+    }
+    return strips;
+  }
+
+  // ---- export helpers ---------------------------------------------------
+  // Trim transparent padding around the ink: find the ink's bounding box in
+  // an RGBA buffer (alpha > threshold), with `pad` px of breathing room.
+  function inkBounds(rgba, w, h, alphaThreshold) {
+    alphaThreshold = alphaThreshold || 8;
+    var minX = w, minY = h, maxX = -1, maxY = -1;
+    for (var y = 0; y < h; y++) {
+      for (var x = 0; x < w; x++) {
+        if (rgba[(y * w + x) * 4 + 3] > alphaThreshold) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+    if (maxX < 0) return null; // empty canvas
+    return { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 };
+  }
+
+  return {
+    makePoint: makePoint,
+    dist: dist,
+    velocityFrom: velocityFrom,
+    smoothPoint: smoothPoint,
+    strokeWidth: strokeWidth,
+    segmentStrip: segmentStrip,
+    buildStroke: buildStroke,
+    inkBounds: inkBounds
+  };
+});
+
+
+(function () {
+  "use strict";
+  var pad = document.getElementById("pad");
+  var preview = document.getElementById("preview");
+  var ctx = pad.getContext("2d");
+  var DPR = Math.max(1, window.devicePixelRatio || 1);
+
+  function sizePad() {
+    var r = pad.getBoundingClientRect();
+    var img = ctx.getImageData ? null : null;
+    // preserve current ink across resize
+    var old = document.createElement("canvas");
+    old.width = pad.width; old.height = pad.height;
+    if (pad.width) old.getContext("2d").drawImage(pad, 0, 0);
+    pad.width = Math.round(r.width * DPR);
+    pad.height = Math.round(r.height * DPR);
+    if (old.width) ctx.drawImage(old, 0, 0, pad.width, pad.height);
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+  }
+  window.addEventListener("resize", sizePad);
+  sizePad();
+
+  // ---- stroke state ----------------------------------------------------
+  var strokes = [];      // each: {color, strips:[…]} — for undo/redo & redraw
+  var undone = [];
+  var drawing = false;
+  var rawPts = [];
+  var lastSmoothed = null;
+
+  function opts() {
+    return {
+      minWidth: 0.4,
+      maxWidth: parseFloat(document.getElementById("thick").value) * DPR,
+      velocityFilterWeight: 0.7,
+      smoothing: 0.5,
+      scale: 1 // points are already in device px
+    };
+  }
+
+  function renderStrips(strips, color, c) {
+    c = c || ctx;
+    c.fillStyle = color;
+    for (var i = 0; i < strips.length; i++) {
+      var s = strips[i];
+      if (s.quad) {
+        c.beginPath();
+        c.moveTo(s.quad[0].x, s.quad[0].y);
+        c.lineTo(s.quad[1].x, s.quad[1].y);
+        c.lineTo(s.quad[2].x, s.quad[2].y);
+        c.lineTo(s.quad[3].x, s.quad[3].y);
+        c.closePath();
+        c.fill();
+      }
+      if (s.capFrom) { c.beginPath(); c.arc(s.capFrom.x, s.capFrom.y, s.capFrom.r, 0, 6.2832); c.fill(); }
+      if (s.capTo) { c.beginPath(); c.arc(s.capTo.x, s.capTo.y, s.capTo.r, 0, 6.2832); c.fill(); }
+    }
+  }
+
+  function redrawAll() {
+    ctx.clearRect(0, 0, pad.width, pad.height);
+    for (var i = 0; i < strokes.length; i++) renderStrips(strokes[i].strips, strokes[i].color);
+    pad.classList.toggle("hint", strokes.length === 0);
+    syncButtons();
+  }
+
+  function syncButtons() {
+    document.getElementById("undo").disabled = strokes.length === 0;
+    document.getElementById("redo").disabled = undone.length === 0;
+    document.getElementById("save").disabled = strokes.length === 0;
+  }
+
+  // ---- pointer input ---------------------------------------------------
+  function evPos(e) {
+    var r = pad.getBoundingClientRect();
+    return signmath.makePoint(
+      (e.clientX - r.left) * (pad.width / r.width),
+      (e.clientY - r.top) * (pad.height / r.height),
+      e.pressure && e.pointerType === "pen" ? e.pressure : 0
+    );
+  }
+
+  pad.addEventListener("pointerdown", function (e) {
+    drawing = true;
+    rawPts = [evPos(e)];
+    lastSmoothed = rawPts[0];
+    pad.classList.remove("hint");
+    if (pad.setPointerCapture) { try { pad.setPointerCapture(e.pointerId); } catch (er) {} }
+    e.preventDefault();
+  });
+  pad.addEventListener("pointermove", function (e) {
+    if (!drawing) return;
+    var p = evPos(e);
+    // minimum distance filter (jitter & double-fire protection)
+    var last = rawPts[rawPts.length - 1];
+    if (signmath.dist(last, p) * DPR < 1.5) return;
+    rawPts.push(p);
+    // live render: incremental strip from the last two smoothed points
+    var sm = signmath.smoothPoint(lastSmoothed, p, 0.5);
+    lastSmoothed = sm;
+    if (rawPts.length >= 2) {
+      var o = opts();
+      var w1 = signmath.strokeWidth(rawPts[rawPts.length - 2], rawPts[rawPts.length - 1], o);
+      var w2 = w1; // will settle next tick
+      // render one segment strip live for immediate feedback
+      var seg = signmath.segmentStrip(last, sm, w1 * 0.9, w1);
+      renderStrips([seg], document.getElementById("color").value);
+    }
+  });
+  function endStroke() {
+    if (!drawing) return;
+    drawing = false;
+    var color = document.getElementById("color").value;
+    var strips = signmath.buildStroke(rawPts, opts());
+    strokes.push({ color: color, strips: strips });
+    undone = [];
+    redrawAll();
+    updatePreview();
+  }
+  pad.addEventListener("pointerup", endStroke);
+  pad.addEventListener("pointercancel", endStroke);
+
+  // ---- tools -----------------------------------------------------------
+  document.getElementById("undo").addEventListener("click", function () {
+    if (!strokes.length) return;
+    undone.push(strokes.pop());
+    redrawAll(); updatePreview();
+  });
+  document.getElementById("redo").addEventListener("click", function () {
+    if (!undone.length) return;
+    strokes.push(undone.pop());
+    redrawAll(); updatePreview();
+  });
+  document.getElementById("clear").addEventListener("click", function () {
+    strokes = []; undone = [];
+    redrawAll();
+    document.getElementById("out").hidden = true;
+  });
+  document.getElementById("thick").addEventListener("change", function () {});
+  document.getElementById("color").addEventListener("change", function () {});
+
+  // ---- export ----------------------------------------------------------
+  function inkCanvas() {
+    // 1. draw all strokes on a tight transparent canvas
+    var b = null;
+    // compute bounds from stroke strips directly
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (var s = 0; s < strokes.length; s++) {
+      var sts = strokes[s].strips;
+      for (var i = 0; i < sts.length; i++) {
+        var st = sts[i];
+        var pts = [];
+        if (st.quad) pts = st.quad;
+        if (st.capFrom) pts = pts.concat([st.capFrom]);
+        if (st.capTo) pts = pts.concat([st.capTo]);
+        for (var j = 0; j < pts.length; j++) {
+          var r = pts[j].r || 0;
+          minX = Math.min(minX, pts[j].x - r); minY = Math.min(minY, pts[j].y - r);
+          maxX = Math.max(maxX, pts[j].x + r); maxY = Math.max(maxY, pts[j].y + r);
+        }
+      }
+    }
+    if (minX === Infinity) return null;
+    var padPx = Math.round(6 * DPR); // breathing room
+    var w = Math.ceil(maxX - minX) + padPx * 2;
+    var h = Math.ceil(maxY - minY) + padPx * 2;
+    var c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    var cc = c.getContext("2d");
+    cc.translate(-minX + padPx, -minY + padPx);
+    for (var k = 0; k < strokes.length; k++) renderStrips(strokes[k].strips, strokes[k].color, cc);
+    return c;
+  }
+
+  function updatePreview() {
+    var c = inkCanvas();
+    var out = document.getElementById("out");
+    if (!c) { out.hidden = true; return; }
+    out.hidden = false;
+    var pr = preview;
+    var maxW = 340;
+    var sc = Math.min(1, maxW / c.width);
+    pr.width = c.width; pr.height = c.height;
+    pr.style.width = Math.round(c.width * sc) + "px";
+    pr.getContext("2d").drawImage(c, 0, 0);
+    document.getElementById("f-size").textContent = c.width + "×" + c.height + " px (透明底)";
+    document.getElementById("white").textContent = "改导出白底 JPEG";
+    // stash for download
+    lastExport = { canvas: c, type: "image/png", ext: "png" };
+  }
+  var lastExport = null;
+
+  document.getElementById("save").addEventListener("click", function () {
+    updatePreview();
+    if (!lastExport) return;
+    lastExport.canvas.toBlob(function (b) {
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(b);
+      a.download = "signature-" + lastExport.canvas.width + "x" + lastExport.canvas.height + "." + lastExport.ext;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }, lastExport.type, lastExport.type === "image/jpeg" ? 0.95 : undefined);
+  });
+
+  document.getElementById("white").addEventListener("click", function () {
+    if (!lastExport) return;
+    if (lastExport.type === "image/png") {
+      // flatten onto white
+      var c = document.createElement("canvas");
+      c.width = lastExport.canvas.width; c.height = lastExport.canvas.height;
+      var cc = c.getContext("2d");
+      cc.fillStyle = "#FFFFFF"; cc.fillRect(0, 0, c.width, c.height);
+      cc.drawImage(lastExport.canvas, 0, 0);
+      lastExport = { canvas: c, type: "image/jpeg", ext: "jpg" };
+      var pr = preview; pr.getContext("2d").clearRect(0, 0, pr.width, pr.height);
+      pr.classList.remove("checker");
+      pr.getContext("2d").drawImage(c, 0, 0);
+      document.getElementById("f-size").textContent = c.width + "×" + c.height + " px (白底)";
+      this.textContent = "改回透明 PNG";
+    } else {
+      updatePreview();
+      preview.classList.add("checker");
+    }
+  });
+  syncButtons();
+})();
+</script>
+</body>
+</html>
