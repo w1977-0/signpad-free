@@ -34,6 +34,16 @@ pointer events → min-distance jitter filter → low-pass smoothing → velocit
 node --test test/signmath.test.js
 ```
 
+## Browser support
+
+Any current Chrome, Edge, Firefox or Safari with Pointer Events — desktop, tablet or phone. Touch, pen and mouse all travel the same pointer path: where the device reports pressure, strokes use it; where it does not, width comes from velocity alone. No build step, no requests after load, nothing written to storage.
+
+## What it does not do
+
+- **No history.** Close the tab and the signature is gone — nothing is cached, synced, or recoverable. That is the privacy model, not a missing feature.
+- **No recognition.** No OCR, no handwriting-to-text, no font matching. The export is pixels, not letters.
+- **No timestamp, seal, or certificate.** The PNG carries no signing time, no identity, and no cryptographic signature, so it is not an electronic signature in the legal sense — it is an image of your handwriting, which is what Word and PDF want.
+
 ## License
 
 MIT
