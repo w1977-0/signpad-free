@@ -8,6 +8,9 @@
 >
 > **日本語** — 無料の手書きサインパッド。ペンの速度に応じて線の太さが変わるリアルな書き心地、透過PNG(Word・PDFにそのまま貼れる)または白背景JPEGで保存。アップロード不要・ブラウザ内だけで動作。**[使ってみる](https://w1977-0.github.io/signpad-free/)**
 
+
+[![CI](https://github.com/w1977-0/signpad-free/actions/workflows/ci.yml/badge.svg)](https://github.com/w1977-0/signpad-free/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![No upload](https://img.shields.io/badge/privacy-no%20upload-green.svg)
+
 ## Why
 
 - **Every "free" signature site wants something** — an account, an email, a watermark-free upgrade. This page is one HTML file on GitHub Pages: there is no server, so there is nothing to pay for and nothing that could store your signature.
