@@ -1,8 +1,8 @@
 // signmath.js — signpad-free core stroke math. Zero dependencies, browser + Node.
 //
 // The feel of a real pen comes from three things, all pure math:
-//   1. smoothing — pointer input is jittery; a first-order low-pass filter and
-//      midpoint quadratic Béziers turn it into a flowing line
+//   1. smoothing — pointer input is jittery; a first-order low-pass filter
+//      pulls each point partway toward the last smoothed one
 //   2. velocity-aware width — fast strokes run thin, slow strokes run fat,
 //      exactly like ink flow (the classic Square signature-pad recipe:
 //      width interpolates between minWidth and maxWidth as velocity rises)
@@ -64,7 +64,9 @@
     var tWidth = maxW - vNorm * (maxW - minW); // velocity term: fast → thin
 
     // pressure term: only meaningful when the device reports real pressure
-    // (Apple Pencil etc.); a mouse reports 0.5 constant — treated as absent.
+    // (Apple Pencil etc.). A mouse reports 0.5 constant, and 0.5 passes this
+    // test, so a mouse is read as mid-pressure rather than as absent —
+    // velocity still carries 70% of the width, which is what keeps it close.
     var p = cur.pressure > 0 && cur.pressure < 1 ? cur.pressure : null;
     var width = p === null
       ? tWidth
